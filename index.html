@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmBridge NG - Harvest & Livestock Decision Assistant</title>
+    <link rel="stylesheet" href="C:\Users\SPECIAL MATH CONTEST\OneDrive\Desktop\Hackerthon project\style.css">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="container header-flex">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fa-solid fa-seedling"></i></div>
+                <div>
+                    <h1>FarmBridge NG</h1>
+                    <span class="badge-pill">Harvest & Livestock Assistant</span>
+                </div>
+            </div>
+            <div class="prototype-notice">
+                <i class="fa-solid fa-circle-info"></i>
+                <span><strong>Demo Mode:</strong> Illustrative sample data & market rates.</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <!-- Hero Intro -->
+        <section class="hero-section">
+            <h2>Empowering Nigerian Farmers & Livestock Producers</h2>
+            <p>Compare real-time buyer demand, market prices, weather forecasts, and an expanded pest & disease library across all 36 states and FCT.</p>
+        </section>
+
+        <!-- Weather Overview Widget -->
+        <section class="card weather-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <div class="icon-box warning"><i class="fa-solid fa-cloud-sun"></i></div>
+                    <div>
+                        <h2>Weather Overview</h2>
+                        <p>Real-time agricultural weather conditions</p>
+                    </div>
+                </div>
+                <div class="weather-actions">
+                    <span class="live-badge"><i class="fa-solid fa-circle"></i> Live data</span>
+                    <div class="location-selector">
+                        <label for="farmLocation">Farm State</label>
+                        <select id="farmLocation"><!-- Populated dynamically --></select>
+                    </div>
+                </div>
+            </div>
+            <div class="weather-body" id="weatherBody">
+                <div class="weather-loading" id="weatherLoading"><i class="fa-solid fa-spinner fa-spin"></i> Fetching live weather information...</div>
+                <div class="weather-info hidden" id="weatherInfo">
+                    <div class="temp-display"><span id="weatherTemp">--</span>°C</div>
+                    <div class="weather-details">
+                        <p id="weatherCondition" class="condition-text">--</p>
+                        <div class="weather-sub-metrics">
+                            <span><i class="fa-solid fa-droplet text-blue"></i> Humidity: <strong id="weatherHumidity">--</strong>%</span>
+                            <span><i class="fa-solid fa-wind text-muted"></i> Wind: <strong id="weatherWind">--</strong> km/h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="weather-footer">
+                <span id="weatherMsg" class="text-muted">Select a state above to view live meteorological metrics.</span>
+                <button id="refreshWeather" class="btn-text"><i class="fa-solid fa-rotate"></i> Refresh weather</button>
+            </div>
+        </section>
+
+        <!-- Farm Activity Updates -->
+        <section class="card activity-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <div class="icon-box success"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <div>
+                        <h2>Farm & Livestock Activity Updates</h2>
+                        <p>Manage crop maintenance, livestock feeding, and vaccination schedules</p>
+                    </div>
+                </div>
+                <div class="task-stats">
+                    <div class="stat-box"><span>Total</span><strong id="totalTasks">0</strong></div>
+                    <div class="stat-box"><span>Pending</span><strong id="pendingTasks" class="text-warning">0</strong></div>
+                    <div class="stat-box"><span>Done</span><strong id="completedTasks" class="text-success">0</strong></div>
+                </div>
+            </div>
+
+            <form id="taskForm" class="task-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="activityType">Activity category</label>
+                        <select id="activityType" required>
+                            <option value="Crops: Watering">Crops: Watering</option>
+                            <option value="Crops: Weeding">Crops: Weeding</option>
+                            <option value="Crops: Fertilizing">Crops: Fertilizing</option>
+                            <option value="Crops: Pest Control">Crops: Pest Control</option>
+                            <option value="Crops: Harvesting">Crops: Harvesting</option>
+                            <option value="Livestock: Feeding">Livestock: Feeding</option>
+                            <option value="Livestock: Vaccination">Livestock: Vaccination / Deworming</option>
+                            <option value="Livestock: Cleaning">Livestock: Pen / Coop Cleaning</option>
+                            <option value="Livestock: Breeding">Livestock: Breeding Check</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dueDate">Due date</label>
+                        <input type="date" id="dueDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="taskDesc">Task description</label>
+                    <input type="text" id="taskDesc" placeholder="e.g. Vaccinate 50 broiler chickens or inspect cattle for ticks" required>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add farm task</button>
+            </form>
+
+            <div class="task-list-container">
+                <h3>Your active schedule</h3>
+                <div id="taskList" class="task-list">
+                    <div class="empty-state" id="emptyTasks">
+                        <i class="fa-solid fa-plant-wilted"></i>
+                        <p>No farm tasks scheduled yet</p>
+                        <span>Add a reminder above to organize your operations.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workspace Navigation Shortcuts -->
+        <div class="workspace-shortcuts">
+            <h3>Quick Actions</h3>
+            <p>Jump directly to marketplace tools with a single click.</p>
+            <div class="shortcut-grid">
+                <button class="shortcut-btn" data-tab="advisory"><i class="fa-solid fa-book-medical"></i><div><strong>Vet & Pest Library</strong><span>Explore 18+ diseases & treatments</span></div></button>
+                <button class="shortcut-btn" data-tab="matches"><i class="fa-solid fa-magnifying-glass-chart"></i><div><strong>Find Matches</strong><span>Compare buyer offers</span></div></button>
+                <button class="shortcut-btn" data-tab="harvest"><i class="fa-solid fa-tractor"></i><div><strong>Post Produce</strong><span>List crops or livestock</span></div></button>
+                <button class="shortcut-btn" data-tab="transactions"><i class="fa-solid fa-handshake"></i><div><strong>Transactions</strong><span>Secure your deals</span></div></button>
+            </div>
+        </div>
+
+        <!-- Main Navigation Tabs -->
+        <nav class="nav-tabs" id="marketplaceTabs">
+            <button class="tab-btn active" data-target="advisory"><i class="fa-solid fa-book-medical"></i> Pest & Vet library</button>
+            <button class="tab-btn" data-target="matches"><i class="fa-solid fa-check-to-slot"></i> Find matches</button>
+            <button class="tab-btn" data-target="harvest"><i class="fa-solid fa-wheat-awn"></i> Farmer harvest</button>
+            <button class="tab-btn" data-target="buyer"><i class="fa-solid fa-cart-shopping"></i> Buyer request</button>
+            <button class="tab-btn" data-target="listings"><i class="fa-solid fa-list"></i> Listings</button>
+            <button class="tab-btn" data-target="transactions"><i class="fa-solid fa-file-contract"></i> Transactions</button>
+        </nav>
+
+        <!-- Tab 1: Comprehensive Pest, Disease & Vet Library -->
+        <div class="tab-content active" id="advisory-tab">
+            <div class="card advisory-main-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="icon-box success" style="width:50px; height:50px; font-size:1.5rem;"><i class="fa-solid fa-book-medical"></i></div>
+                        <div>
+                            <h2>Comprehensive Agricultural & Veterinary Library</h2>
+                            <p>Diagnostic symptoms, preventive biosecurity, and treatment protocols for Nigerian crops & livestock</p>
+                        </div>
+                    </div>
+                    <div class="library-stats-badge">
+                        <span><strong id="advisoryCount">18</strong> Guides Available</span>
+                    </div>
+                </div>
+
+                <!-- Search & Category Filter Toolbar -->
+                <div class="library-toolbar">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="advisorySearch" placeholder="Search by crop, animal, symptom, or disease (e.g. Tomato, Newcastle, Blight, Cattle)...">
+                    </div>
+                    <div class="filter-pills" id="advisoryCategoryPills">
+                        <button class="pill-btn active" data-filter="All">All Categories</button>
+                        <button class="pill-btn" data-filter="Crop Disease">Crop Diseases</button>
+                        <button class="pill-btn" data-filter="Crop Pest">Crop Pests</button>
+                        <button class="pill-btn" data-filter="Livestock Disease">Livestock Diseases</button>
+                        <button class="pill-btn" data-filter="Poultry Disease">Poultry Diseases</button>
+                    </div>
+                </div>
+
+                <!-- Expanded Disease & Pest Grid -->
+                <div class="advisory-grid" id="advisoryGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Find Matches -->
+        <div class="tab-content" id="matches-tab">
+            <div class="grid-2col">
+                <div class="card form-card">
+                    <h2>Find a buyer match</h2>
+                    <p class="section-desc">Select a crop or animal type and your state to compare buyer offers.</p>
+                    <form id="matchForm">
+                        <div class="form-group">
+                            <label for="matchCategory">Category</label>
+                            <select id="matchCategory">
+                                <option value="Crops">🌾 Crops & Produce</option>
+                                <option value="Livestock">Cattle, Goat, Poultry & Animals</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="matchItem">Item & Estimated Rate</label>
+                            <select id="matchItem"><!-- Populated dynamically --></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="matchLocation">Farmer location / state</label>
+                            <select id="matchLocation">
+                                <option value="Any">Any location (Nationwide)</option>
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="matchQuantity">Available quantity (kg or heads)</label>
+                            <input type="number" id="matchQuantity" value="500" min="1" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Compare buyer requests</button>
+                    </form>
+                </div>
+
+                <div class="card result-card">
+                    <h2>How to read the results</h2>
+                    <p class="section-desc">Calculations based on actual wholesale market rates across Nigeria.</p>
+                    
+                    <div class="result-item">
+                        <div class="result-title-badge">
+                            <h3>Indicative buyer price</h3>
+                            <span class="badge-sample">Sample Rate</span>
+                        </div>
+                        <p>Illustrative price offered per kilogram or per animal head in current markets.</p>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-title-badge">
+                            <h3>Estimated transport</h3>
+                            <span class="badge-editable">Logistics</span>
+                        </div>
+                        <p>Interstate delivery logistics estimated to protect farmer net revenue margins.</p>
+                    </div>
+
+                    <div class="result-item">
+                        <h3>Next step</h3>
+                        <p>Verify buyer credentials, animal health certificates/quality, and payment terms before dispatch.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="matchResultsContainer" class="match-results-list"></div>
+        </div>
+
+        <!-- Tab 3: Farmer Harvest -->
+        <div class="tab-content" id="harvest-tab">
+            <div class="grid-2col">
+                <div class="card form-card">
+                    <h2>List expected produce or animals</h2>
+                    <p class="section-desc">Make your upcoming harvest or livestock stock visible to commercial buyers.</p>
+                    <form id="harvestForm">
+                        <div class="form-group">
+                            <label for="farmerName">Farmer / cooperative / farm name</label>
+                            <input type="text" id="farmerName" placeholder="e.g. Green Valley Agro-Pastoral Cooperative" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="harvestCategory">Category</label>
+                            <select id="harvestCategory">
+                                <option value="Crops">🌾 Crops & Produce</option>
+                                <option value="Livestock">Cattle, Goat, Poultry & Animals</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="harvestItem">Item</label>
+                                <select id="harvestItem"><!-- Populated dynamically --></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="harvestQty">Quantity (kg / heads)</label>
+                                <input type="number" id="harvestQty" value="500" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="harvestState">State location</label>
+                                <select id="harvestState"><!-- Populated dynamically --></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="harvestDate">Available date</label>
+                                <input type="date" id="harvestDate" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Publish listing</button>
+                    </form>
+                </div>
+
+                <div class="card info-card">
+                    <h2>Why list early?</h2>
+                    <p class="section-desc">Advance listings secure better forward contracts with buyers and meat processors.</p>
+                    <div class="info-point">
+                        <h4><i class="fa-solid fa-circle-check text-success"></i> Transparent specifications</h4>
+                        <p>Clearly state crop variety or animal breed, weight, and readiness date.</p>
+                    </div>
+                    <div class="info-point">
+                        <h4><i class="fa-solid fa-shield-halved text-success"></i> Safe trading</h4>
+                        <p>Protect your business by confirming escrow terms prior to transport.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Buyer Request -->
+        <div class="tab-content" id="buyer-tab">
+            <div class="grid-2col">
+                <div class="card form-card">
+                    <h2>Post a buyer request</h2>
+                    <p class="section-desc">Publish your crop or livestock requirements to source directly from farms.</p>
+                    <form id="buyerRequestForm">
+                        <div class="form-group">
+                            <label for="buyerBusName">Buyer / business name</label>
+                            <input type="text" id="buyerBusName" placeholder="e.g. City Fresh Foods Ltd" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="buyerCategory">Category</label>
+                            <select id="buyerCategory">
+                                <option value="Crops">🌾 Crops & Produce</option>
+                                <option value="Livestock">Cattle, Goat, Poultry & Animals</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="buyerReqItem">Item needed</label>
+                                <select id="buyerReqItem"><!-- Populated dynamically --></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="buyerReqQty">Quantity (kg or heads)</label>
+                                <input type="number" id="buyerReqQty" value="300" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="buyerReqState">Delivery state</label>
+                                <select id="buyerReqState"><!-- Populated dynamically --></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="buyerIndicativePrice">Indicative price (₦/unit)</label>
+                                <input type="number" id="buyerIndicativePrice" placeholder="e.g. 1950" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="buyerTransportCost">Estimated transport allowance (₦)</label>
+                            <input type="number" id="buyerTransportCost" value="10000" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Publish buyer request</button>
+                    </form>
+                </div>
+
+                <div class="card info-card">
+                    <h2>Smart matching engine</h2>
+                    <p class="section-desc">Cross-references farmer yields and livestock stock with buyer demand.</p>
+                    <div class="info-point">
+                        <h4>Direct sourcing</h4>
+                        <p>Eliminate unnecessary middlemen costs for crops and live animals.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Listings -->
+        <div class="tab-content" id="listings-tab">
+            <div class="card listings-container-card">
+                <h2>Marketplace Feed</h2>
+                <p class="section-desc">Live sample and user-submitted crop and livestock listings across Nigeria.</p>
+                <div class="listings-grid">
+                    <div class="listing-column">
+                        <h3><i class="fa-solid fa-tractor text-success"></i> Available Harvest & Animals</h3>
+                        <div id="harvestListingsContainer" class="list-stack"></div>
+                    </div>
+                    <div class="listing-column">
+                        <h3><i class="fa-solid fa-cart-shopping text-success"></i> Buyer Requests</h3>
+                        <div id="buyerRequestsContainer" class="list-stack"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 6: Transactions -->
+        <div class="tab-content" id="transactions-tab">
+            <div class="card transaction-card">
+                <h2>Secure Buyer-Seller Transactions</h2>
+                <p class="section-desc">Track escrow orders securely from agreement to delivery confirmation.</p>
+                
+                <div class="grid-2col">
+                    <form id="transactionForm">
+                        <div class="form-group">
+                            <label for="transCategory">Category</label>
+                            <select id="transCategory">
+                                <option value="Crops">🌾 Crops & Produce</option>
+                                <option value="Livestock">Cattle, Goat, Poultry & Animals</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="transProduce">Item</label>
+                            <select id="transProduce"><!-- Populated dynamically --></select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transRole">I am acting as</label>
+                                <select id="transRole">
+                                    <option value="Buyer">Buyer</option>
+                                    <option value="Seller">Seller</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="otherParty">Counterparty name</label>
+                                <input type="text" id="otherParty" placeholder="Buyer or seller name" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transQty">Quantity (kg or heads)</label>
+                                <input type="number" id="transQty" value="100" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="transPrice">Agreed price per unit (₦)</label>
+                                <input type="number" id="transPrice" value="1950" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transLocation">Delivery destination</label>
+                                <input type="text" id="transLocation" placeholder="Town, Market or State" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="transDate">Estimated delivery date</label>
+                                <input type="date" id="transDate" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="transNotes">Contract notes</label>
+                            <textarea id="transNotes" rows="3" placeholder="Health clearance, weight grade, delivery method"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block"><i class="fa-solid fa-lock"></i> Initiate Escrow Deal</button>
+                    </form>
+
+                    <div class="transaction-process">
+                        <h3>Escrow Workflow</h3>
+                        <ul class="process-steps">
+                            <li class="step active">
+                                <span class="step-num">1</span>
+                                <div>
+                                    <strong>Offer created</strong>
+                                    <p>Terms agreed upon by both parties.</p>
+                                </div>
+                            </li>
+                            <li class="step">
+                                <span class="step-num">2</span>
+                                <div>
+                                    <strong>Offer accepted</strong>
+                                    <p>Price, volume, and location locked.</p>
+                                </div>
+                            </li>
+                            <li class="step">
+                                <span class="step-num">3</span>
+                                <div>
+                                    <strong>Payment escrowed</strong>
+                                    <p>Funds secured through verified gateway.</p>
+                                </div>
+                            </li>
+                            <li class="step">
+                                <span class="step-num">4</span>
+                                <div>
+                                    <strong>Delivery confirmed</strong>
+                                    <p>Inspection passed & funds released.</p>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div class="active-transactions-box" id="activeTransactions">
+                            <h4>Active Deals</h4>
+                            <div id="dealsList" class="deals-list">
+                                <p class="text-muted">No active transactions initiated yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="container footer-content">
+            <p>🌾 <strong>FarmBridge NG</strong> — Harvest & Livestock Decision Assistant · Hackathon Prototype</p>
+            <p class="footer-sub">Demo only. Not affiliated with or endorsed by Woma Bank. Illustrative market data.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
